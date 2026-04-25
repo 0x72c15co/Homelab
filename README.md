@@ -30,17 +30,17 @@ The primary hurdle during the deployment phase was establishing connectivity wit
 Even after configuring static IPs, the Kali machine could not ping the Windows 10 VM, resulting in Destination Host Unreachable.
 
 #### Diagnosis:
-      Windows 10 classifies internal networks without a gateway as "Unidentified Networks," automatically applying the most restrictive Public Firewall Profile. This profile silences the host by dropping       all ICMP (ping) requests.
+Windows 10 classifies internal networks without a gateway as "Unidentified Networks," automatically applying the most restrictive Public Firewall Profile. This profile silences the host by dropping       all ICMP (ping) requests.
 
 #### Fix:
 I performed a two-step verification and fix:
 
 ##### 1. Isolation Test: 
-      Briefly disabled all firewall profiles using netsh advfirewall set allprofiles state off to confirm the VirtualBox internal wiring was correct.
+Briefly disabled all firewall profiles using netsh advfirewall set allprofiles state off to confirm the VirtualBox internal wiring was correct.
 
-##### 2. Granular Hardening: 
-      Re-enabled the firewall and applied a specific exception rule to allow ICMP traffic while maintaining the system's defensive posture:
-            netsh advfirewall firewall add rule name="Allow ICMPv4" protocol=icmpv4:8,any dir=in action=allow
+##### 2. Granular Hardening:
+Re-enabled the firewall and applied a specific exception rule to allow ICMP traffic while maintaining the system's defensive posture:
 
+      netsh advfirewall firewall add rule name="Allow ICMPv4" protocol=icmpv4:8,any dir=in action=allow
 
 
