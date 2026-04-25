@@ -7,23 +7,24 @@
 ## 1. Network Architecture
 My lab environment consists of three virtual machines hosted in a localized, isolated network to ensure safe testing.
 
-#### Management/Update Segment (NATNetwork): 
+* **Management/Update Network (NATNetwork):** 
 Provides controlled internet access to the Attacker and Targets for updates.
 
-#### Target Segment A (labnet):
+* **Target Network A (labnet):**
 An internal network for modern infrastructure (Windows 10 and Ubuntu Server).
 
-#### Target Segment B (msfnet): 
+* **Target Network B (msfnet):** 
 A dedicated internal network for legacy/vulnerable systems (Metasploitable 2).
 
-### IP Schema
+### Network Connectivity & Machine roles
+A brief information about the network connectivity and roles of VMs using in the homelab
 
-| Machine | Operating System | IP Address | Network Segment | Role |
+| Machine | Operating System | IP Address | Network connection | Role |
 | :--- | :--- | :--- | :--- | :--- |
-| **Attacker** | Kali Linux 2026.1 | 192.168.100.10 | LabNet (Internal) | Primary attack platform |
-| **Target 1** | Ubuntu Server 26.04 | 192.168.100.20 | LabNet (Internal) | General purpose server for configuration testing |
-| **Target 2** | Windows 10 Pro | 192.168.100.30 | LabNet (Internal) | Modern workstation |
-| **Target 3** | Metasploitable2 | 192.168.200.50 | MSFNet (Internal) | Purposefully vulnerable linux server | 
+| **Attacker** | Kali Linux 2026.1 | 192.168.100.10 | NATNetwork, LabNet, MSFNet | Primary attack platform |
+| **Target 1** | Ubuntu Server 26.04 | 192.168.100.20 | NATNetwork, LabNet | General purpose server for configuration testing |
+| **Target 2** | Windows 10 Pro | 192.168.100.30 | NATNetwork, LabNet | Modern workstation |
+| **Target 3** | Metasploitable2 | 192.168.200.50 | MSFNet | Purposefully vulnerable linux server | 
 
 
 
@@ -39,25 +40,26 @@ To verify the integrity of the lab, I performed ICMP (ping) tests between the at
 | **Target 3** | Metasploitable2 | Success |
 
 #### Issue: ICMP Silent Host
-Even after configuring static IPs, the Kali machine could not ping the Windows 10 VM, resulting in Destination Host Unreachable.
+* Even after configuring static IPs, the Kali machine could not ping the Windows 10 VM, resulting in Destination Host Unreachable.
 
 #### Diagnosis:
-While the Linux targets responded immediately, windows 10 classifies internal networks without a gateway as "Unidentified Networks," automatically applying the most restrictive Public Firewall Profile. This profile silences the host by dropping all ICMP (ping) requests.
+* While the Linux targets responded immediately, windows 10 classifies internal networks without a gateway as "Unidentified Networks," automatically applying the most restrictive Public Firewall Profile. This profile silences the host by dropping all ICMP (ping) requests.
 
 #### The Root Cause: 
-Windows Firewall's default state allows all outbound traffic but blocks almost all unsolicited inbound traffic (Default-Deny). While the network 'plumbing' was correct, the host-based security policy was dropping the Attacker's ICMP Echo Requests.
+* Windows Firewall's default state allows all outbound traffic but blocks almost all unsolicited inbound traffic (Default-Deny). While the network 'plumbing' was correct, the host-based security policy was dropping the Attacker's ICMP Echo Requests.
 
-#### The Fix:
-I performed a two-step verification and fix:
+#### Solutions:
 
-##### 1. Isolation Test: 
-Briefly disabled all firewall profiles using netsh advfirewall set allprofiles state off to confirm the VirtualBox internal wiring was correct and reconfigured the internal network adapter by manually assigning ip address and the subnet mask.
+* **1. Isolation Test:**
+Briefly disabled all firewall profiles using netsh advfirewall set allprofiles state off to confirm the VirtualBox internal wiring was correct and reconfigured the internal             network adapter by manually assigning ip address and the subnet mask.
 
-##### 2. Granular Hardening:
+* **2. Granular Hardening:**
 Re-enabled the firewall and applied a specific exception rule to allow ICMP traffic while maintaining the system's defensive posture:
 
       netsh advfirewall firewall add rule name="Allow ICMPv4" protocol=icmpv4:8,any dir=in action=allow
-      
+
+A comparision table between before applying the solution and after applying the solution:
+
 <table>
   <tr>
     <td><b>Before (Firewall On)</b></td>
@@ -95,7 +97,7 @@ Once connectivity was stabilized, I verified the lab's functionality by performi
 
 ## Network Reconnaissance & Vulnerability Assessment
 
-### 1. Legacy Target: Metasploitable 2 (192.168.200.50)
+### 1. Target: Metasploitable 2 (192.168.200.50)
 This machine represents an intentionally insecure legacy Linux server. The scan revealed a massive attack surface with 23 open ports.
 
 * **Status: Highly Vulnerable**
@@ -105,7 +107,7 @@ This machine represents an intentionally insecure legacy Linux server. The scan 
 * Web vulnerabilities: Port 80 (HTTP) / Port 8180 (Apache Tomcat)
    
 
-### 2. Hardened Target: Ubuntu Server (192.168.100.20)
+### 2. Target: Ubuntu Server (192.168.100.20)
 This host demonstrates a modern "Default-Deny" security posture.
 
 * **Status: Secured**
@@ -114,10 +116,10 @@ This host demonstrates a modern "Default-Deny" security posture.
 * **Security Analysis:** The attack surface is minimal. Initial entry would likely require a brute-force attack or finding a vulnerability in a web application if one were deployed in the future.
 * **Nmap Note:** OS detection was unable to find an exact match due to the lack of open ports, which is a defensive success.
 
-### 3. Workstation Target: Windows 10 (192.168.100.30)
+### 3. Target: Windows 10 (192.168.100.30)
 This scan highlights the effectiveness of the Windows Defender Firewall in an enterprise-style configuration.
 
-* **Status: Stealth / Filtered**
+* **Status: Filtered**
   
 * **Observation:** Almost all 65,535 ports are "Filtered," meaning the firewall is silently dropping packets.
 * **Finding:** Port 7680 is the only open port, used by Windows "Delivery Optimization."
