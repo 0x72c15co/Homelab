@@ -1,7 +1,7 @@
 # Project: Virtual Homelab
 ##### Date: April 2026
 
-#### Objective: To build a private, isolated sandbox for environment to simulate real-world attacks and defence using VirtualBox.
+#### Objective: To build a private, isolated sandbox environment to simulate real-world attacks and defence using VirtualBox.
 
 
 ## 1. Network Architecture
