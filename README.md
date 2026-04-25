@@ -41,7 +41,10 @@ Even after configuring static IPs, the Kali machine could not ping the Windows 1
 #### Diagnosis:
 While the Linux targets responded immediately, windows 10 classifies internal networks without a gateway as "Unidentified Networks," automatically applying the most restrictive Public Firewall Profile. This profile silences the host by dropping all ICMP (ping) requests.
 
-#### Fix:
+#### The Root Cause: 
+Windows Firewall's default state allows all outbound traffic but blocks almost all unsolicited inbound traffic (Default-Deny). While the network 'plumbing' was correct, the host-based security policy was dropping the Attacker's ICMP Echo Requests.
+
+#### The Fix:
 I performed a two-step verification and fix:
 
 ##### 1. Isolation Test: 
