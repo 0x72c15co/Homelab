@@ -3,6 +3,7 @@
 
 #### Objective: To build a private, isolated sandbox for environment to simulate real-world attacks and defence using VirtualBox.
 
+
 ## 1. Network Architecture
 My lab environment consists of three virtual machines hosted in a localized, isolated network to ensure safe testing.
 
@@ -23,6 +24,8 @@ A dedicated internal network for legacy/vulnerable systems (Metasploitable 2).
 | **Target 1** | Ubuntu Server 26.04 | 192.168.100.20 | LabNet (Internal) | General purpose server for configuration testing |
 | **Target 2** | Windows 10 Pro | 192.168.100.30 | LabNet (Internal) | Modern workstation |
 | **Target 3** | Metasploitable2 | 192.168.200.50 | MSFNet (Internal) | Purposefully vulnerable linux server | 
+
+
 
 ## 2. Connectivity testing & Troubleshooting
 To verify the integrity of the lab, I performed ICMP (ping) tests between the attacker and targets.
@@ -54,39 +57,74 @@ Briefly disabled all firewall profiles using netsh advfirewall set allprofiles s
 Re-enabled the firewall and applied a specific exception rule to allow ICMP traffic while maintaining the system's defensive posture:
 
       netsh advfirewall firewall add rule name="Allow ICMPv4" protocol=icmpv4:8,any dir=in action=allow
-
+      
 <table>
   <tr>
     <td><b>Before (Firewall On)</b></td>
     <td><b>After (Firewall Off)</b></td>
   </tr>
   <tr>
-    <td><img src="pow/windows ping failed.png" width="300"></td>
-    <td><img src="pow/windows ping success.png" width="300"></td>
+    <td><img src="pow/windows ping failed.png" width="400"></td>
+    <td><img src="pow/windows ping success.png" width="400"></td>
   </tr>
 </table>
+
+
 
 ## 3. Lab Verification (Proof of Concept)
 Once connectivity was stabilized, I verified the lab's functionality by performing a series of initial exploits against the legacy segment.
 
 ### Key exploitations performed:
 
-##### 1. Service Enumeration: 
-Used nmap to identify open ports on the 192.168.200.0/24 subnet.
+*  **1. Service Enumeration:**
+        Used nmap to identify open ports on the 192.168.200.0/24 subnet.
 
-##### 2. vsftpd 2.3.4 Backdoor: 
-Triggered the smile face (:)) backdoor on port 21, successfully gaining a root shell.
+* **2. vsftpd 2.3.4 Backdoor:**
+        Triggered the smile face (:)) backdoor on port 21, successfully gaining a root shell.
 
-##### 3. PostgreSQL: 
-Confirmed unauthenticated login vulnerabilities, allowing for database credential harvesting.
-* **Verification:** [View Screenshot of Successful Root Shell](<img src="./pow/postgre login.png" width="300">)
-##### 4. Samba usermap_script: 
-Leveraged Metasploit to gain an initial foothold on the Metasploitable 2 machine.
+* **3. PostgreSQL:** 
+      Confirmed unauthenticated login vulnerabilities, allowing for database credential harvesting.
+  
+* **4. Samba usermap_script:** 
+      Leveraged Metasploit to gain an initial foothold on the Metasploitable 2 machine.
 
-* **Vulnerability:** FTP Backdoor (vsftpd 2.3.4)
-* **Verification:** [View Screenshot of Successful Root Shell](./images/msf_exploit.png)
 
-<a name="evidence"></a>
-### 📂 Technical Appendix (Evidence)
-* **Proof A:** [Successful Root Shell](./images/msf_exploit.png)
-* **Proof B:** [Credential Harvest](./images/creds.png)
+### Exploitation Evidence: 
+[vsftpd backdoor](./pow/vsftpd.png) | [postgre login](./pow/postgre_login.png) | [Samba usermap](./pow/samba_usermap.png)
+
+
+## Network Reconnaissance & Vulnerability Assessment
+
+### 1. Legacy Target: Metasploitable 2 (192.168.200.50)
+This machine represents an intentionally insecure legacy Linux server. The scan revealed a massive attack surface with 23 open ports.
+
+* **Status: Highly Vulnerable**
+
+* Key findings: Port 21 (FTP) - vsftpd 2.3.4, Port 445 (SMB) - Samba 3.0.20
+* weak configs: Port 23 (Telnet), Port 3306 (MySQL), Port 2121 (ProFTPD 1.3.1)
+* Web vulnerabilities: Port 80 (HTTP) / Port 8180 (Apache Tomcat)
+   
+
+### 2. Hardened Target: Ubuntu Server (192.168.100.20)
+This host demonstrates a modern "Default-Deny" security posture.
+
+* **Status: Secured**
+  
+* **Observation:** Only Port 22 (SSH) is open. It is running OpenSSH 10.2p1, a current version patched against recent vulnerabilities.
+* **Security Analysis:** The attack surface is minimal. Initial entry would likely require a brute-force attack or finding a vulnerability in a web application if one were deployed in the future.
+* **Nmap Note:** OS detection was unable to find an exact match due to the lack of open ports, which is a defensive success.
+
+### 3. Workstation Target: Windows 10 (192.168.100.30)
+This scan highlights the effectiveness of the Windows Defender Firewall in an enterprise-style configuration.
+
+* **Status: Stealth / Filtered**
+  
+* **Observation:** Almost all 65,535 ports are "Filtered," meaning the firewall is silently dropping packets.
+* **Finding:** Port 7680 is the only open port, used by Windows "Delivery Optimization."
+* **Analysis:** Even with the ICMP (ping) exception I previously configured, the host remains largely invisible to service scanning, requiring more advanced enumeration techniques or local access.
+
+
+### Technical Appendix (Nmap Reports)
+* **Metasploit report:** [Metasploit](./Reports/metasploit_scan.txt)
+* **Ubuntu Server report:** [Ubuntu server](./Reports/server_scan.txt)
+* **windows report:** [Windows](./Reports/win_scan.txt)
