@@ -30,10 +30,10 @@ To verify the integrity of the lab, I performed ICMP (ping) tests between the at
 ### The Results:
 
 | Machine | Operating System | Status |
-| :--- | :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- |
 | **Target 1** | Ubuntu Server 26.04 | Success |
 | **Target 2** | Windows 10 pro | Failed (Request timed out) |
-| **Target 3** | Metasploitable2 | Success | 
+| **Target 3** | Metasploitable2 | Success |
 
 #### Issue: ICMP Silent Host
 Even after configuring static IPs, the Kali machine could not ping the Windows 10 VM, resulting in Destination Host Unreachable.
