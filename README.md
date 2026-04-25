@@ -55,6 +55,17 @@ Re-enabled the firewall and applied a specific exception rule to allow ICMP traf
 
       netsh advfirewall firewall add rule name="Allow ICMPv4" protocol=icmpv4:8,any dir=in action=allow
 
+<table>
+  <tr>
+    <td><b>Before (Firewall On)</b></td>
+    <td><b>After (Firewall Off)</b></td>
+  </tr>
+  <tr>
+    <td><img src="pow/windows ping failed.png" width="300"></td>
+    <td><img src="pow/windows ping success.png" width="300"></td>
+  </tr>
+</table>
+
 ## 3. Lab Verification (Proof of Concept)
 Once connectivity was stabilized, I verified the lab's functionality by performing a series of initial exploits against the legacy segment.
 
@@ -68,6 +79,14 @@ Triggered the smile face (:)) backdoor on port 21, successfully gaining a root s
 
 ##### 3. PostgreSQL: 
 Confirmed unauthenticated login vulnerabilities, allowing for database credential harvesting.
-
+* **Verification:** [View Screenshot of Successful Root Shell](<img src="./pow/postgre login.png" width="300">)
 ##### 4. Samba usermap_script: 
 Leveraged Metasploit to gain an initial foothold on the Metasploitable 2 machine.
+
+* **Vulnerability:** FTP Backdoor (vsftpd 2.3.4)
+* **Verification:** [View Screenshot of Successful Root Shell](./images/msf_exploit.png)
+
+<a name="evidence"></a>
+### 📂 Technical Appendix (Evidence)
+* **Proof A:** [Successful Root Shell](./images/msf_exploit.png)
+* **Proof B:** [Credential Harvest](./images/creds.png)
