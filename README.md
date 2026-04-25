@@ -6,7 +6,7 @@ Date: April 2026
 ### 1. Network Architecture
 The lab is designed with three distinct network segments to simulate an enterprise environment with isolated trust zones.
 
-##### Management/Update Segment (NATNetwork): 
+#### Management/Update Segment (NATNetwork): 
 Provides controlled internet access to the Attacker and Targets for updates.
 
 #### Target Segment A (labnet):
