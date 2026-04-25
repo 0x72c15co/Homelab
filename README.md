@@ -58,12 +58,12 @@ Re-enabled the firewall and applied a specific exception rule to allow ICMP traf
 
       netsh advfirewall firewall add rule name="Allow ICMPv4" protocol=icmpv4:8,any dir=in action=allow
 
-A comparision table between before applying the solution and after applying the solution:
+A comparision table between before and after troubleshooting fix:
 
 <table>
   <tr>
-    <td><b>Before (Firewall On)</b></td>
-    <td><b>After (Firewall Off)</b></td>
+    <td><b>Before fix</b></td>
+    <td><b>After fix</b></td>
   </tr>
   <tr>
     <td><img src="pow/windows ping failed.png" width="400"></td>
@@ -76,10 +76,10 @@ A comparision table between before applying the solution and after applying the 
 ## 3. Lab Verification (Proof of Concept)
 Once connectivity was stabilized, I verified the lab's functionality by performing a series of initial exploits against the legacy segment.
 
-### Key exploitations performed:
+### Recon & exploitations performed:
 
 *  **1. Service Enumeration:**
-        Used nmap to identify open ports on the 192.168.200.0/24 subnet.
+        Used nmap to identify open ports on the 192.168.200.0/24 and 192.168.100.10/24 subnet.
 
 * **2. vsftpd 2.3.4 Backdoor:**
         Triggered the smile face (:)) backdoor on port 21, successfully gaining a root shell.
@@ -95,7 +95,7 @@ Once connectivity was stabilized, I verified the lab's functionality by performi
 [vsftpd backdoor](./pow/vsftpd.png) | [postgre login](./pow/postgre_login.png) | [Samba usermap](./pow/samba_usermap.png)
 
 
-## Network Reconnaissance & Vulnerability Assessment
+## Vulnerability Assessment
 
 ### 1. Target: Metasploitable 2 (192.168.200.50)
 This machine represents an intentionally insecure legacy Linux server. The scan revealed a massive attack surface with 23 open ports.
